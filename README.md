@@ -182,7 +182,7 @@ async function fetchUserProfile() {
 fetchUserProfile();
 ```
 
-# ফ্রন্টএন্ডে API কল করার উদাহরণ:
+# ফ্রন্টএন্ডে API কল করার উদাহরণ another way:
 
 ```javascript
 // অ্যাক্সেস টোকেনের মেয়াদ শেষ হলে নতুন টোকেন রিকোয়েস্ট করা
