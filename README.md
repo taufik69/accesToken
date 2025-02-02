@@ -184,23 +184,30 @@ fetchUserProfile();
 
 # ফ্রন্টএন্ডে API কল করার উদাহরণ:
 
-আপনি উপরের fetchWithAuth ফাংশনটি ব্যবহার করে যেকোনো প্রোটেক্টেড API কল করতে পারেন।
-
-কোড উদাহরণ:
 ```javascript
-async function fetchUserProfile() {
-    try {
-        const response = await fetchWithAuth('/api/profile');
-        if (response.ok) {
-            const data = await response.json();
-            console.log('User Profile:', data);
-        } else {
-            console.error('Failed to fetch profile');
-        }
-    } catch (error) {
-        console.error('Error:', error);
-    }
-}
+// অ্যাক্সেস টোকেনের মেয়াদ শেষ হলে নতুন টোকেন রিকোয়েস্ট করা
+async function fetchWithRefreshToken(url, options) {
+    const response = await fetch(url, options);
 
-fetchUserProfile();
+    if (response.status === 401) { // যদি অ্যাক্সেস টোকেনের মেয়াদ শেষ হয়ে যায়
+        const refreshResponse = await fetch('/refresh-token', {
+            method: 'POST',
+            credentials: 'include', // কুকি পাঠানোর জন্য
+        });
+
+        if (refreshResponse.ok) {
+            const { accessToken } = await refreshResponse.json();
+            localStorage.setItem('accessToken', accessToken); // নতুন অ্যাক্সেস টোকেন সংরক্ষণ
+
+            // নতুন টোকেন দিয়ে আবার রিকোয়েস্ট করা
+            options.headers['Authorization'] = `Bearer ${accessToken}`;
+            return fetch(url, options);
+        } else {
+            // রিফ্রেশ টোকেনও অবৈধ হলে লগইন পেজে রিডাইরেক্ট করা
+            window.location.href = '/login';
+        }
+    }
+
+    return response;
+}
 ```
